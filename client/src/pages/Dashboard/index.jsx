@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import useStore from '../../store/store';
+import useAppStore from '../../store/useAppStore';
 
 const Dashboard = () => {
-  const addProduct = useStore((state) => state.addProduct);
+  const {addProduct} = useAppStore()
   const [productData, setProductData] = useState({
     title: '',
     description: '',

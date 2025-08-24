@@ -1,19 +1,23 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import useStore from "../../store/store";
+import { Link, Navigate, useNavigate } from "react-router-dom";
+import useAppStore, { cookieStorage } from "../../store/useAppStore.js";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
-  const { login } = useStore();
+  const { login, isLoading, error } = useAppStore();
+
+  if (cookieStorage.getItem("veg-token")) {
+    return <Navigate to="/" replace />;
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await login(email, password);
-      console.log("Logging in with", { email, password });
-      navigate("/dashboard");
+      const loggedInUser = await login(email, password);
+      // Redirect based on user role
+      navigate(loggedInUser?.role === "admin" ? "/dashboard" : "/");
     } catch (error) {
       console.error("Failed to log in", error);
     }
@@ -22,6 +26,7 @@ const Login = () => {
   return (
     <div className="container mx-auto">
       <h1 className="text-4xl font-bold text-center my-8">Login</h1>
+      {error && <p className="text-red-500 text-center mb-4">{error}</p>}
       <form onSubmit={handleSubmit} className="max-w-md mx-auto">
         <div className="mb-4">
           <label htmlFor="email">Email</label>
@@ -45,9 +50,10 @@ const Login = () => {
         </div>
         <button
           type="submit"
-          className="w-full bg-blue-500 text-white py-2 rounded-md"
+          className="w-full bg-blue-500 text-white py-2 rounded-md disabled:bg-blue-300"
+          disabled={isLoading}
         >
-          Login
+          {isLoading ? "Logging in..." : "Login"}
         </button>
         <p className="text-center mt-4">
           Don't have an account?{" "}

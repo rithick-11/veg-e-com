@@ -1,19 +1,20 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import useStore from "../../store/store";
+import useAppStore from "../../store/useAppStore.js";
 
 const Signup = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { signup } = useStore();
   const navigate = useNavigate();
+  const { signup, isLoading, error } = useAppStore();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await signup(name, email, password);
-      navigate("/dashboard");
+      const newUser = await signup(name, email, password);
+      // Redirect based on user role
+      navigate(newUser?.role === 'admin' ? '/dashboard' : '/');
     } catch (error) {
       console.error("Failed to sign up", error);
     }
@@ -22,6 +23,7 @@ const Signup = () => {
   return (
     <div className="container mx-auto">
       <h1 className="text-4xl font-bold text-center my-8">Sign up</h1>
+      {error && <p className="text-red-500 text-center mb-4">{error}</p>}
       <form onSubmit={handleSubmit} className="max-w-md mx-auto">
         <div className="mb-4">
           <label htmlFor="name">Name</label>
@@ -55,9 +57,10 @@ const Signup = () => {
         </div>
         <button
           type="submit"
-          className="w-full bg-blue-500 text-white py-2 rounded-md"
+          className="w-full bg-blue-500 text-white py-2 rounded-md disabled:bg-blue-300"
+          disabled={isLoading}
         >
-          Sign up
+          {isLoading ? "Signing up..." : "Sign up"}
         </button>
         <p className="text-center mt-4">
           Already have an account?{" "}
