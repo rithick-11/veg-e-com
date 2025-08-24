@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import Cookies from "js-cookie";
-import server from "../services/api";
+import server, { setToken } from "../services/api";
+import toast from "react-hot-toast";
 
 export const cookieStorage = {
   getItem: (name) => {
@@ -29,6 +30,7 @@ const useAppStore = create((set, get) => ({
         password,
       });
       cookieStorage.setItem("veg-token", data.token);
+      setToken(data.token);
       set({ user: data, token: data.token, isLoading: false });
       return data;
     } catch (error) {
@@ -45,6 +47,7 @@ const useAppStore = create((set, get) => ({
         password,
       });
       cookieStorage.setItem("veg-token", data.token);
+      setToken(data.token);
       set({ user: data, token: data.token, isLoading: false });
       return data;
     } catch (error) {
@@ -53,32 +56,61 @@ const useAppStore = create((set, get) => ({
       throw error;
     }
   },
-  logout: () => set({ user: null, token: null }),
+  logout: () => {
+    set({ user: null, token: null });
+    cookieStorage.removeItem("veg-token");
+    setToken(null);
+  },
 
   // Cart Slice
   cartItems: [],
-  addToCart: (product) =>
-    set((state) => {
-      const exist = state.cartItems.find((x) => x.id === product.id);
-      if (exist) {
-        return {
-          cartItems: state.cartItems.map((x) =>
-            x.id === product.id ? { ...exist, qty: exist.qty + 1 } : x
-          ),
-        };
-      }
-      return { cartItems: [...state.cartItems, { ...product, qty: 1 }] };
-    }),
-  removeFromCart: (product) =>
-    set((state) => ({
-      cartItems: state.cartItems.filter((x) => x.id !== product.id),
-    })),
-  clearCart: () => set({ cartItems: [] }),
+  getCart: async () => {
+    try {
+      const { data } = await server.get("/cart");
+      set({ cartItems: data.items });
+    } catch (error) {
+      console.error("Failed to fetch cart:", error);
+      toast.error(error.response?.data?.message || "Failed to fetch cart");
+    }
+  },
+  addToCart: async (productId, quantity) => {
+    try {
+      const { data } = await server.post("/cart", { productId, quantity });
+      set({ cartItems: data.items });
+      toast.success("Item added to cart");
+    } catch (error) {
+      console.error("Failed to add to cart:", error);
+      toast.error(error.response?.data?.message || "Failed to fetch cart");
+    }
+  },
+  removeFromCart: async (productId) => {
+    try {
+      const { data } = await server.delete(`/cart/${productId}`);
+      set({ cartItems: data.items });
+      toast.success("Item removed from cart");
+    } catch (error) {
+      console.error("Failed to remove from cart:", error);
+
+      toast.error(error.response?.data?.message || "Failed to fetch cart");
+    }
+  },
+  clearCart: async () => {
+    try {
+      await server.delete("/cart");
+      set({ cartItems: [] });
+      toast.success("Cart cleared");
+    } catch (error) {
+      console.error("Failed to clear cart:", error);
+      toast.error(error.response?.data?.message || "Failed to fetch cart");
+    }
+  },
   fetchProducts: async () => {
+    if (get().products.length > 0) return;
     try {
       const response = await server.get("/products");
       set({ products: response.data });
     } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to fetch cart");
       console.error("Failed to fetch products:", error);
     }
   },
@@ -86,9 +118,11 @@ const useAppStore = create((set, get) => ({
     try {
       const response = await server.post("/products", productData);
       set((state) => ({ products: [...state.products, response.data] }));
+      toast.success("Product added successfully!");
       return response.data;
     } catch (error) {
       console.error("Failed to add product:", error);
+      toast.error(error.response?.data?.message || "Failed to fetch cart");
       throw error;
     }
   },

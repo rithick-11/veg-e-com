@@ -16,6 +16,7 @@ const Login = () => {
     e.preventDefault();
     try {
       const loggedInUser = await login(email, password);
+
       // Redirect based on user role
       navigate(loggedInUser?.role === "admin" ? "/dashboard" : "/");
     } catch (error) {

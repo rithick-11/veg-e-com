@@ -1,8 +1,9 @@
 import React from "react";
+import { Toaster } from "react-hot-toast";
 import { Container } from "./components/UI";
 import { Route, Routes } from "react-router-dom";
 import { Footer, Navbar, NewLetter } from "./components";
-import { Home, Dashboard, Login, Signup } from "./pages";
+import { Home, Dashboard, Login, Signup, Cart } from "./pages";
 
 const App = () => {
   return (
@@ -15,13 +16,15 @@ const App = () => {
             <Route path="/dashboard" element={<Dashboard />}></Route>
             <Route path="/login" element={<Login />}></Route>
             <Route path="/signup" element={<Signup />}></Route>
+            <Route path="/cart" element={<Cart />}></Route>
           </Routes>
           <NewLetter />
         </Container>{" "}
         <Footer />
       </div>
+      <Toaster position="top-right" reverseOrder={false} />
     </div>
   );
 };
 
-export default App;
+export default App

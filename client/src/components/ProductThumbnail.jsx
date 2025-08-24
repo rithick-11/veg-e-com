@@ -2,10 +2,18 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { BsCartPlus } from "react-icons/bs";
 
+import useAppStore from "../store/useAppStore";
+
 const ProductThumbnail = ({ product }) => {
+  const { addToCart } = useAppStore();
+
   const finalPrice = product.finalPrice
     ? product.finalPrice
     : product.price * (1 - (product.discountPercentage || 0) / 100);
+
+  const handleAddToCart = () => {
+    addToCart(product._id, 1);
+  };
 
   return (
     <li className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-xl transition-shadow duration-300 group flex flex-col">
@@ -40,7 +48,10 @@ const ProductThumbnail = ({ product }) => {
         </div>
       </Link>
       <div className="px-4 pb-4 mt-auto">
-        <button className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-green-600 text-white font-semibold hover:bg-green-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50">
+        <button
+          onClick={handleAddToCart}
+          className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-green-600 text-white font-semibold hover:bg-green-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
+        >
           <BsCartPlus className="text-lg" />
           Add to Cart
         </button>
