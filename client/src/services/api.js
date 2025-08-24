@@ -2,11 +2,11 @@ import axios from "axios";
 import Cookies from "js-cookie";
 
 const server = axios.create({
-  baseURL:   import.meta.env.development === 'development'?  import.meta.env.VITE_BASE_URL : "http://localhost:5000/api",
+  baseURL: import.meta.env. VITE_BASEURL || "http://localhost:5000/api",
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
-    Authorization: `Bearer ${ Cookies.get("veg-token") || null}`,
+    Authorization: `Bearer ${Cookies.get("veg-token") || null}`,
   },
 });
 

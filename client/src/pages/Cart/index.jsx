@@ -18,6 +18,9 @@ const Cart = () => {
     getCart();
   }, []);
 
+  console.log(import.meta.env.VITE_BASEURL );
+  
+
   const handleQuantityChange = (productId, quantity) => {
     if (quantity > 0) {
       addToCart(productId, quantity);
