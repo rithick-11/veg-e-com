@@ -16,15 +16,22 @@ const CartItem = ({ item, handleQuantityChange, handleRemoveFromCart }) => {
         </div>
       </div>
       <div className="flex items-center">
-        <input
-          type="number"
-          min="1"
-          value={item.quantity}
-          onChange={(e) =>
-            handleQuantityChange(item.product._id, parseInt(e.target.value))
-          }
-          className="w-16 px-2 py-1 border rounded-md text-center"
-        />
+        <div className="flex items-center">
+          <button
+            onClick={() => handleQuantityChange(item.product._id, item.quantity - 1)}
+            className="px-3 py-1 bg-gray-200 rounded-md hover:bg-gray-300"
+            disabled={item.quantity <= 1}
+          >
+            -
+          </button>
+          <span className="px-4 py-1 border-t border-b">{item.quantity}</span>
+          <button
+            onClick={() => handleQuantityChange(item.product._id, item.quantity + 1)}
+            className="px-3 py-1 bg-gray-200 rounded-md hover:bg-gray-300"
+          >
+            +
+          </button>
+        </div>
         <button
           onClick={() => handleRemoveFromCart(item.product._id)}
           className="ml-4 text-red-500 hover:text-red-700"

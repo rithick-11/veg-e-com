@@ -1,4 +1,6 @@
-const Product = require('../models/Product');
+const Product = require("../models/Product");
+const Cart = require("../models/Cart");
+const { getProdutByUserid } = require("../utils/heler");
 
 // @desc    Add a new product
 // @route   POST /api/products
@@ -9,7 +11,9 @@ const addProduct = async (req, res) => {
     const createdProduct = await product.save();
     res.status(201).json(createdProduct);
   } catch (error) {
-    res.status(400).json({ message: 'Error adding product', error: error.message });
+    res
+      .status(400)
+      .json({ message: "Error adding product", error: error.message });
   }
 };
 
@@ -18,10 +22,19 @@ const addProduct = async (req, res) => {
 // @access  Public
 const getProducts = async (req, res) => {
   try {
-    const products = await Product.find({});
+    let products = []; // Always fetch all products first
+
+    if (req.user) {
+      products = await getProdutByUserid(req.user._id);
+    } else {
+      products = await Product.find();
+    }
+
     res.json(products);
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching products', error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching products", error: error.message });
   }
 };
 

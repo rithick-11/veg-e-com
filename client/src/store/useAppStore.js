@@ -48,7 +48,12 @@ const useAppStore = create((set, get) => ({
       });
       cookieStorage.setItem("veg-token", data.token);
       setToken(data.token);
-      set({ user: data, token: data.token, isLoading: false });
+      set({
+        user: data,
+        token: data.token,
+        isLoading: false,
+        products: data.products,
+      });
       return data;
     } catch (error) {
       const message = error.response?.data?.message || error.message;
@@ -64,6 +69,7 @@ const useAppStore = create((set, get) => ({
 
   // Cart Slice
   cartItems: [],
+  products: [],
   getCart: async () => {
     try {
       const { data } = await server.get("/cart");
@@ -92,6 +98,16 @@ const useAppStore = create((set, get) => ({
       console.error("Failed to remove from cart:", error);
 
       toast.error(error.response?.data?.message || "Failed to fetch cart");
+    }
+  },
+  updateCartQuantity: async (productId, quantity) => {
+    try {
+      const { data } = await server.put(`/cart/${productId}`, { quantity });
+      set({ cartItems: data.items });
+      toast.success("Cart updated");
+    } catch (error) {
+      console.error("Failed to update cart:", error);
+      toast.error(error.response?.data?.message || "Failed to update cart");
     }
   },
   clearCart: async () => {

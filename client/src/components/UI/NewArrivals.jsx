@@ -1,10 +1,10 @@
 import React from "react";
-import useStore from "../../store/store";
+import useAppStore from "../../store/useAppStore";
 import { useEffect } from "react";
 import ProductThumbnail from "../ProductThumbnail";
 
 const NewArrivals = () => {
-  const { fetchProducts, products } = useStore();
+  const { fetchProducts, products } = useAppStore();
 
   useEffect(() => {
     fetchProducts();

@@ -1,6 +1,10 @@
 const User = require("../models/User");
+const Product = require("../models/Product");
+const Cart = require("../models/Cart");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { get } = require("mongoose");
+const { getProdutByUserid } = require("../utils/heler");
 
 const signup = async (req, res) => {
   try {
@@ -44,9 +48,7 @@ const signup = async (req, res) => {
 
 const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
-    console.log(req.body);
-
+    const { email, password } = req.body
     if (!email || !password) {
       return res.status(400).json({ message: "Please enter all fields" });
     }
@@ -59,6 +61,7 @@ const login = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        products : await getProdutByUserid(user._id),
         token: generateToken(user._id),
       });
     } else {
