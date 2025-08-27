@@ -5,4 +5,6 @@ import Signup from "./Signup";
 
 import Cart from "./Cart";
 
-export { Home, Dashboard, Login , Signup, Cart };
+import Product from "./Product";
+
+export { Home, Dashboard, Login , Signup, Cart, Product };

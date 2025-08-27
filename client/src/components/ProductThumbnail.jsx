@@ -4,17 +4,28 @@ import { BsCartPlus } from "react-icons/bs";
 import useAppStore from "../store/useAppStore";
 
 const ProductThumbnail = ({ product }) => {
-  const { addToCart, updateCartQuantity, removeFromCart } =
-    useAppStore();
+  const { addToCart, updateCartQuantity, removeFromCart } = useAppStore();
+  const [isLoading, setIsLoading] = React.useState(false);
 
-  const { title, category, id, price,finalPrice, discountPercentage, isInCart , cartQuantity} = product;
+  const {
+    title,
+    category,
+    id,
+    price,
+    finalPrice,
+    discountPercentage,
+    isInCart,
+    cartQuantity,
+  } = product;
 
-  if(isInCart){
+  if (isInCart) {
     console.log("Product is in cart:", product);
   }
 
-  const handleAddToCart = () => {
-    addToCart(product._id, 1);
+  const handleAddToCart = async () => {
+    setIsLoading(true);
+    await addToCart(product._id, 1);
+    setIsLoading(false);
   };
 
   const handleQuantityChange = (newQuantity) => {
@@ -55,9 +66,7 @@ const ProductThumbnail = ({ product }) => {
               ₹{Math.round(finalPrice)}
             </p>
             {product.discountPercentage > 0 && (
-              <p className="text-sm text-gray-400 line-through">
-                ₹{price}
-              </p>
+              <p className="text-sm text-gray-400 line-through">₹{price}</p>
             )}
           </div>
         </div>
@@ -87,8 +96,14 @@ const ProductThumbnail = ({ product }) => {
             onClick={handleAddToCart}
             className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-green-600 text-white font-semibold hover:bg-green-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
           >
-            <BsCartPlus className="text-lg" />
-            Add to Cart
+            {!isLoading ? (
+              <>
+                <BsCartPlus className="text-lg" />
+                Add to Cart
+              </>
+            ) : (
+              <p>Adding to cart</p>
+            )}
           </button>
         )}
       </div>

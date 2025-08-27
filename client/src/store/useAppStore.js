@@ -82,7 +82,16 @@ const useAppStore = create((set, get) => ({
   addToCart: async (productId, quantity) => {
     try {
       const { data } = await server.post("/cart", { productId, quantity });
-      set({ cartItems: data.items });
+      let products = get().products.map((p) => {
+        if (p._id === productId) {
+          return { ...p, cartQuantity: quantity, isInCart: true };
+        }
+        return p;
+      });
+      set({
+        cartItems: data.items,
+        products: products,
+      });
       toast.success("Item added to cart");
     } catch (error) {
       console.error("Failed to add to cart:", error);
@@ -103,7 +112,14 @@ const useAppStore = create((set, get) => ({
   updateCartQuantity: async (productId, quantity) => {
     try {
       const { data } = await server.put(`/cart/${productId}`, { quantity });
-      set({ cartItems: data.items });
+      set((state) => ({
+        cartItems: data.items,
+        products: state.products.map((p) =>
+          p._id === productId
+            ? { ...p, cartQuantity: quantity, isInCart: quantity > 0 }
+            : p
+        ),
+      }));
       toast.success("Cart updated");
     } catch (error) {
       console.error("Failed to update cart:", error);
@@ -128,6 +144,20 @@ const useAppStore = create((set, get) => ({
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to fetch cart");
       console.error("Failed to fetch products:", error);
+    }
+  },
+  getProductById: async (productId) => {
+    let product = get().products.find((p) => p._id === productId);
+
+    if (product) return product;
+    try {
+      console.log("Fetching product from server:", productId);
+      const response = await server.get(`/products/${productId}`);
+      return response.data;
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to fetch cart");
+      console.error("Failed to fetch products:", error);
+      return {};
     }
   },
   addProduct: async (productData) => {

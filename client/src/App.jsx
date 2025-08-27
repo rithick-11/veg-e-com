@@ -3,7 +3,7 @@ import { Toaster } from "react-hot-toast";
 import { Container } from "./components/UI";
 import { Route, Routes } from "react-router-dom";
 import { Footer, Navbar, NewLetter } from "./components";
-import { Home, Dashboard, Login, Signup, Cart } from "./pages";
+import { Home, Dashboard, Login, Signup, Cart, Product } from "./pages";
 
 const App = () => {
   return (
@@ -17,6 +17,7 @@ const App = () => {
             <Route path="/login" element={<Login />}></Route>
             <Route path="/signup" element={<Signup />}></Route>
             <Route path="/cart" element={<Cart />}></Route>
+            <Route path="/product/:id" element={<Product />}></Route>
           </Routes>
           <NewLetter />
         </Container>{" "}
