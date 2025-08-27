@@ -5,6 +5,7 @@ import NewArrivals from "./UI/NewArrivals";
 import ProductThumbnail from "./ProductThumbnail";
 import NewLetter from "./NewLetter";
 import Footer from "./Footer";
+import ScrollToTop from "./ScrollToTop";
 
 export {
   Navbar,
@@ -14,4 +15,5 @@ export {
   ProductThumbnail,
   NewLetter,
   Footer,
+  ScrollToTop,
 };
