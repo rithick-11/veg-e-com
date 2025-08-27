@@ -7,4 +7,8 @@ import Cart from "./Cart";
 
 import Product from "./Product";
 
-export { Home, Dashboard, Login , Signup, Cart, Product };
+import Checkout from "./Checkout";
+
+import Profile from "./Profile";
+
+export { Home, Dashboard, Login , Signup, Cart, Product, Checkout, Profile };

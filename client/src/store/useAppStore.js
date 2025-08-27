@@ -11,7 +11,7 @@ export const cookieStorage = {
     Cookies.set(name, value, { expires: 7, path: "/" });
   },
   removeItem: (name) => {
-    Cookies.remove(name);
+    Cookies.remove(name); 
   },
 };
 
@@ -21,6 +21,9 @@ const useAppStore = create((set, get) => ({
   token: null,
   isLoading: false,
   error: null,
+  isUserLoading: true, // New state for user loading status
+  users: [], // New state for admin user management
+  orders: [], // New state for admin order management
   signup: async (name, email, password) => {
     set({ isLoading: true, error: null });
     try {
@@ -31,7 +34,7 @@ const useAppStore = create((set, get) => ({
       });
       cookieStorage.setItem("veg-token", data.token);
       setToken(data.token);
-      set({ user: data, token: data.token, isLoading: false });
+      set({ user: data.user, token: data.token, isLoading: false });
       return data;
     } catch (error) {
       const message = error.response?.data?.message || error.message;
@@ -49,7 +52,7 @@ const useAppStore = create((set, get) => ({
       cookieStorage.setItem("veg-token", data.token);
       setToken(data.token);
       set({
-        user: data,
+        user: data.user,
         token: data.token,
         isLoading: false,
         products: data.products,
@@ -61,10 +64,184 @@ const useAppStore = create((set, get) => ({
       throw error;
     }
   },
-  logout: () => {
+  logout: async () => {
     set({ user: null, token: null });
     cookieStorage.removeItem("veg-token");
+    get().fetchProducts();
     setToken(null);
+  },
+  loadUser: async () => {
+    set({ isUserLoading: true }); // Set loading to true
+    const token = cookieStorage.getItem("veg-token");
+    if (token) {
+      setToken(token);
+      try {
+        // Assuming the profile endpoint returns the user object directly
+        const res = await server.get("/users/profile");
+        console.log(res);
+        set({ user: res.data, token, isUserLoading: false }); // Set loading to false on success
+      } catch (error) {
+        console.error("Failed to load user", error);
+        get().logout();
+        set({ isUserLoading: false }); // Set loading to false on error
+      }
+    } else {
+      set({ isUserLoading: false }); // Set loading to false if no token
+    }
+  },
+
+  // Admin User Management
+  getAllUsers: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const { data } = await server.get("/users");
+      set({ users: data, isLoading: false });
+    } catch (error) {
+      const message = error.response?.data?.message || error.message;
+      set({ error: message, isLoading: false });
+      toast.error(message);
+    }
+  },
+  updateUser: async (id, userData) => {
+    set({ isLoading: true, error: null });
+    try {
+      const { data } = await server.put(`/users/${id}`, userData);
+      set((state) => ({
+        users: state.users.map((user) => (user._id === id ? data : user)),
+        isLoading: false,
+      }));
+      toast.success("User updated successfully!");
+    } catch (error) {
+      const message = error.response?.data?.message || error.message;
+      set({ error: message, isLoading: false });
+      toast.error(message);
+      throw error;
+    }
+  },
+  deleteUser: async (id) => {
+    set({ isLoading: true, error: null });
+    try {
+      await server.delete(`/users/${id}`);
+      set((state) => ({
+        users: state.users.filter((user) => user._id !== id),
+        isLoading: false,
+      }));
+      toast.success("User deleted successfully!");
+    } catch (error) {
+      const message = error.response?.data?.message || error.message;
+      set({ error: message, isLoading: false });
+      toast.error(message);
+      throw error;
+    }
+  },
+
+  // Admin Order Management
+  getAllOrders: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const { data } = await server.get("/orders");
+      set({ orders: data, isLoading: false });
+    } catch (error) {
+      const message = error.response?.data?.message || error.message;
+      set({ error: message, isLoading: false });
+      toast.error(message);
+    }
+  },
+  updateOrder: async (id, orderData) => {
+    set({ isLoading: true, error: null });
+    try {
+      const { data } = await server.put(`/orders/${id}`, orderData);
+      set((state) => ({
+        orders: state.orders.map((order) => (order._id === id ? data : order)),
+        isLoading: false,
+      }));
+      toast.success("Order updated successfully!");
+    } catch (error) {
+      const message = error.response?.data?.message || error.message;
+      set({ error: message, isLoading: false });
+      toast.error(message);
+      throw error;
+    }
+  },
+  deleteOrder: async (id) => {
+    set({ isLoading: true, error: null });
+    try {
+      await server.delete(`/orders/${id}`);
+      set((state) => ({
+        orders: state.orders.filter((order) => order._id !== id),
+        isLoading: false,
+      }));
+      toast.success("Order deleted successfully!");
+    } catch (error) {
+      const message = error.response?.data?.message || error.message;
+      set({ error: message, isLoading: false });
+      toast.error(message);
+      throw error;
+    }
+  },
+
+  // Admin Product Management
+  getAllProducts: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const { data } = await server.get("/products/admin");
+      set({ products: data, isLoading: false });
+    } catch (error) {
+      const message = error.response?.data?.message || error.message;
+      set({ error: message, isLoading: false });
+      toast.error(message);
+    }
+  },
+  createProduct: async (productData) => {
+    set({ isLoading: true, error: null });
+    try {
+      const { data } = await server.post("/products", productData);
+      set((state) => ({
+        products: [...state.products, data],
+        isLoading: false,
+      }));
+      toast.success("Product added successfully!");
+      return data;
+    } catch (error) {
+      const message = error.response?.data?.message || error.message;
+      set({ error: message, isLoading: false });
+      toast.error(message);
+      throw error;
+    }
+  },
+  updateProduct: async (id, productData) => {
+    set({ isLoading: true, error: null });
+    try {
+      const { data } = await server.put(`/products/${id}`, productData);
+      set((state) => ({
+        products: state.products.map((product) =>
+          product._id === id ? data : product
+        ),
+        isLoading: false,
+      }));
+      toast.success("Product updated successfully!");
+    } catch (error) {
+      const message = error.response?.data?.message || error.message;
+      set({ error: message, isLoading: false });
+      toast.error(message);
+      throw error;
+    }
+  },
+  deleteProduct: async (id) => {
+    set({ isLoading: true, error: null });
+    try {
+      await server.delete(`/products/${id}`);
+      set((state) => ({
+        products: state.products.filter((product) => product._id !== id),
+        isLoading: false,
+      }));
+      toast.success("Product deleted successfully!");
+    } catch (error) {
+      const message = error.response?.data?.message || error.message;
+      set({ error: message, isLoading: false });
+      toast.error(message);
+      throw error;
+    }
   },
 
   // Cart Slice
@@ -137,6 +314,7 @@ const useAppStore = create((set, get) => ({
     }
   },
   fetchProducts: async () => {
+    // This fetchProducts is for the public view, not admin
     if (get().products.length > 0) return;
     try {
       const response = await server.get("/products");

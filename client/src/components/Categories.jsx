@@ -12,9 +12,9 @@ const Categories = () => {
             <Link className="absolute inset-0" to={category.link}></Link>
             <img
               src={category.image}
-              className="h-28 w-28 shadow-2xl rounded-full object-cover aspect-square"
+              className="h-16 w-16 md:h-28 md:w-28 shadow-2xl rounded-full object-cover aspect-square"
             />
-            <h2 className="text-lg text-center font-light">{category.name}</h2>
+            <h2 className="text-sm md:text-lg text-center font-light">{category.name}</h2>
           </li>
         ))}
       </ul>

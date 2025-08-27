@@ -11,6 +11,7 @@ const server = axios.create({
 });
 
 export const setToken = (token) => {
+  console.log(token);
   if (token) {
     server.defaults.headers.common["Authorization"] = `Bearer ${token}`;
   } else {

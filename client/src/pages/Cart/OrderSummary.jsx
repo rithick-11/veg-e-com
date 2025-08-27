@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 const OrderSummary = ({ totalPrice }) => {
   return (
@@ -17,9 +18,11 @@ const OrderSummary = ({ totalPrice }) => {
         <span>Total</span>
         <span>₹{totalPrice.toFixed(2)}</span>
       </div>
-      <button className="w-full mt-6 bg-green-600 text-white py-2 rounded-md hover:bg-green-700">
-        Proceed to Checkout
-      </button>
+      <Link to="/checkout">
+        <button className="w-full mt-6 bg-green-600 text-white py-2 rounded-md hover:bg-green-700">
+          Proceed to Checkout
+        </button>
+      </Link>
     </div>
   );
 };
