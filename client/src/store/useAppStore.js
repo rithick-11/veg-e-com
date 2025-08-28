@@ -24,6 +24,8 @@ const useAppStore = create((set, get) => ({
   isUserLoading: true, // New state for user loading status
   users: [], // New state for admin user management
   orders: [], // New state for admin order management
+  currentOrder: null, // For viewing a single order's details
+  myOrders: [], // New state for user's own orders
   signup: async (name, email, password) => {
     set({ isLoading: true, error: null });
     try {
@@ -147,21 +149,67 @@ const useAppStore = create((set, get) => ({
       toast.error(message);
     }
   },
-  updateOrder: async (id, orderData) => {
+  getMyOrders: async () => {
     set({ isLoading: true, error: null });
     try {
-      const { data } = await server.put(`/orders/${id}`, orderData);
-      set((state) => ({
-        orders: state.orders.map((order) => (order._id === id ? data : order)),
-        isLoading: false,
-      }));
-      toast.success("Order updated successfully!");
+      const { data } = await server.get("/orders/myorders");
+      set({ myOrders: data, isLoading: false });
     } catch (error) {
       const message = error.response?.data?.message || error.message;
       set({ error: message, isLoading: false });
       toast.error(message);
+    }
+  },
+  getOrderDetails: async (id) => {
+    set({ isLoading: true, error: null });
+    try {
+      const { data } = await server.get(`/orders/${id}`);
+      set({ currentOrder: data, isLoading: false });
+    } catch (error) {
+      const message = error.response?.data?.message || error.message;
+      set({ error: message, isLoading: false });
+      toast.error(message);
+      throw error; // Re-throw so the component can handle navigation/UI changes
+    }
+  },
+  createOrder: async (orderData) => {
+    set({ isLoading: true, error: null });
+    try {
+      const { cartItems } = get();
+      if (cartItems.length === 0) {
+        toast.error("Your cart is empty.");
+        throw new Error("Cart is empty");
+      }
+
+      const orderPayload = {
+        ...orderData, // Contains shippingAddress, etc.
+        orderItems: cartItems.map((item) => ({
+          name: item.product.name,
+          quantity: item.quantity,
+          image: item.product.images[0], // Assuming the first image is the main one
+          price: item.product.finalPrice,
+          product: item.product._id, // Pass the product ID
+        })),
+      };
+
+      const { data } = await server.post("/orders", orderPayload);
+      toast.success("Order placed successfully!");
+      get().clearCart(); // Clear cart after successful order
+      set({ isLoading: false, currentOrder: data, myOrders: [...get().myOrders, data] });
+      return data;
+    } catch (error) {
+      const message = error.response?.data?.message || "Failed to place order.";
+      set({ error: message, isLoading: false });
       throw error;
     }
+  },
+  updateOrder: async (id, orderData) => {
+    const { data } = await server.put(`/orders/${id}`, orderData);
+    set((state) => ({
+      orders: state.orders.map((order) =>
+        order._id === id ? data : order
+      ),
+    }));
   },
   deleteOrder: async (id) => {
     set({ isLoading: true, error: null });
@@ -257,51 +305,32 @@ const useAppStore = create((set, get) => ({
     }
   },
   addToCart: async (productId, quantity) => {
-    try {
-      const { data } = await server.post("/cart", { productId, quantity });
-      let products = get().products.map((p) => {
-        if (p._id === productId) {
-          return { ...p, cartQuantity: quantity, isInCart: true };
-        }
-        return p;
-      });
-      set({
-        cartItems: data.items,
-        products: products,
-      });
-      toast.success("Item added to cart");
-    } catch (error) {
-      console.error("Failed to add to cart:", error);
-      toast.error(error.response?.data?.message || "Failed to fetch cart");
-    }
+    const { data } = await server.post("/cart", { productId, quantity });
+    let products = get().products.map((p) => {
+      if (p._id === productId) {
+        return { ...p, quantity: quantity, inCart: true };
+      }
+      return p;
+    });
+    set({
+      cartItems: data.items,
+      products: products,
+    });
   },
   removeFromCart: async (productId) => {
-    try {
-      const { data } = await server.delete(`/cart/${productId}`);
-      set({ cartItems: data.items });
-      toast.success("Item removed from cart");
-    } catch (error) {
-      console.error("Failed to remove from cart:", error);
-
-      toast.error(error.response?.data?.message || "Failed to fetch cart");
-    }
+    const { data } = await server.delete(`/cart/${productId}`);
+    set({ cartItems: data.items });
   },
   updateCartQuantity: async (productId, quantity) => {
-    try {
-      const { data } = await server.put(`/cart/${productId}`, { quantity });
-      set((state) => ({
-        cartItems: data.items,
-        products: state.products.map((p) =>
-          p._id === productId
-            ? { ...p, cartQuantity: quantity, isInCart: quantity > 0 }
-            : p
-        ),
-      }));
-      toast.success("Cart updated");
-    } catch (error) {
-      console.error("Failed to update cart:", error);
-      toast.error(error.response?.data?.message || "Failed to update cart");
-    }
+    const { data } = await server.put(`/cart/${productId}`, { quantity });
+    set((state) => ({
+      cartItems: data.items,
+      products: state.products.map((p) =>
+        p._id === productId
+          ? { ...p, quantity: quantity, inCart: quantity > 0 }
+          : p
+      ),
+    }));
   },
   clearCart: async () => {
     try {
@@ -325,9 +354,6 @@ const useAppStore = create((set, get) => ({
     }
   },
   getProductById: async (productId) => {
-    let product = get().products.find((p) => p._id === productId);
-
-    if (product) return product;
     try {
       console.log("Fetching product from server:", productId);
       const response = await server.get(`/products/${productId}`);

@@ -1,18 +1,30 @@
-import React, { useEffect, useState } from 'react';
-import useAppStore from '../../store/useAppStore';
-import { toast } from 'react-hot-toast';
-import { FaEdit, FaTrash, FaTag } from 'react-icons/fa';
+import React, { useEffect, useState } from "react";
+import useAppStore from "../../store/useAppStore";
+import { toast } from "react-hot-toast";
+import { FaEdit, FaTrash, FaTag } from "react-icons/fa";
 
 const ProductManagement = () => {
-  const { products, getAllProducts, createProduct, updateProduct, deleteProduct, isLoading, error } = useAppStore();
+  const {
+    products,
+    getAllProducts,
+    createProduct,
+    updateProduct,
+    deleteProduct,
+    isLoading,
+    error,
+  } = useAppStore();
   const [editingProduct, setEditingProduct] = useState(null);
   const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    price: '',
-    category: '',
-    image: '',
-    countInStock: '',
+    name: "",
+    description: "",
+    price: "",
+    unit: "kg", // Default unit
+    discountPercentage: 0, // Default discount
+    category: "",
+    image: "",
+    countInStock: "",
+    isOrganic: false, // Default to false
+    origin: "",
   });
 
   useEffect(() => {
@@ -28,32 +40,32 @@ const ProductManagement = () => {
     try {
       if (editingProduct) {
         await updateProduct(editingProduct._id, formData);
-        toast.success('Product updated successfully!');
+        toast.success("Product updated successfully!");
       } else {
         await createProduct(formData);
-        toast.success('Product added successfully!');
+        toast.success("Product added successfully!");
       }
       setEditingProduct(null);
       setFormData({
-        name: '',
-        description: '',
-        price: '',
-        category: '',
-        image: '',
-        countInStock: '',
+        title: "",
+        description: "",
+        price: "",
+        category: "",
+        images: "",
+        countInStock: "",
       });
     } catch (err) {
-      toast.error(err.message || 'Failed to save product');
+      toast.error(err.message || "Failed to save product");
     }
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this product?')) {
+    if (window.confirm("Are you sure you want to delete this product?")) {
       try {
         await deleteProduct(id);
-        toast.success('Product deleted successfully!');
+        toast.success("Product deleted successfully!");
       } catch (err) {
-        toast.error(err.message || 'Failed to delete product');
+        toast.error(err.message || "Failed to delete product");
       }
     }
   };
@@ -64,26 +76,32 @@ const ProductManagement = () => {
       name: product.title || product.name,
       description: product.description,
       price: product.price,
+      unit: product.unit || "kg",
+      discountPercentage: product.discountPercentage || 0,
       category: product.category,
-      image: product.image,
-      countInStock: product.countInStock,
+      image: product.images?.[0] || product.image, // Use images array first, then fallback to image
+      countInStock: product.stock, // Use product.stock for countInStock
+      isOrganic: product.isOrganic || false,
+      origin: product.origin || "",
     });
   };
 
   const handleCancelEdit = () => {
     setEditingProduct(null);
     setFormData({
-      name: '',
-      description: '',
-      price: '',
-      category: '',
-      image: '',
-      countInStock: '',
+      title: "",
+      description: "",
+      price: "",
+      category: "",
+      images: "",
+      countInStock: "",
     });
   };
 
-  if (isLoading) return <div className="text-center p-8">Loading products...</div>;
-  if (error) return <div className="text-center p-8 text-red-600">Error: {error}</div>;
+  if (isLoading)
+    return <div className="text-center p-8">Loading products...</div>;
+  if (error)
+    return <div className="text-center p-8 text-red-600">Error: {error}</div>;
 
   const Tooltip = ({ text, children }) => (
     <div className="relative group">
@@ -96,27 +114,42 @@ const ProductManagement = () => {
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800">Product Management</h2>
+      <h2 className="text-2xl font-bold mb-6 text-gray-800">
+        Product Management
+      </h2>
 
-      <form onSubmit={handleCreateOrUpdate} className="mb-8 p-6 bg-white rounded-lg shadow">
+      <form
+        onSubmit={handleCreateOrUpdate}
+        className="mb-8 p-6 bg-white rounded-lg shadow"
+      >
         <h3 className="text-xl font-semibold mb-5 border-b pb-4">
-          {editingProduct ? 'Edit Product' : 'Add New Product'}
+          {editingProduct ? "Edit Product" : "Add New Product"}
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Product Title</label>
+            <label
+              htmlFor="name"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Product Title
+            </label>
             <input
               type="text"
-              name="name"
-              id="name"
-              value={formData.name}
+              name="title"
+              id="title"
+              value={formData.titl}
               onChange={handleChange}
               className="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
               required
             />
           </div>
           <div>
-            <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">Price (₹)</label>
+            <label
+              htmlFor="price"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Price (₹)
+            </label>
             <input
               type="number"
               name="price"
@@ -128,8 +161,13 @@ const ProductManagement = () => {
               required
             />
           </div>
-          <div className="md:col-span-2">
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+          <div className="col-span-2">
+            <label
+              htmlFor="description"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Description
+            </label>
             <textarea
               name="description"
               id="description"
@@ -140,20 +178,56 @@ const ProductManagement = () => {
               required
             ></textarea>
           </div>
-          <div>
-            <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+          <div className="col-span-2">
+            <label
+              htmlFor="images"
+              className="block text-sm font-medium  text-gray-700 mb-1"
+            >
+              Product image url
+            </label>
             <input
               type="text"
-              name="category"
-              id="category"
-              value={formData.category}
+              name="images"
+              id="images"
+              value={formData.images}
               onChange={handleChange}
               className="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
               required
             />
           </div>
           <div>
-            <label htmlFor="countInStock" className="block text-sm font-medium text-gray-700 mb-1">Count In Stock</label>
+            <label
+              htmlFor="category"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Category
+            </label>
+            <select
+              name="category"
+              id="category"
+              value={formData.category}
+              onChange={handleChange}
+              className="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              required
+            >
+              <option value="">Select Category</option>
+              <option value="Leafy Green">Leafy Green</option>
+              <option value="Root Vegetables">Root Vegetables</option>
+              <option value="Cruciferous">Cruciferous</option>
+              <option value="Marrow">Marrow</option>
+              <option value="Stem">Stem</option>
+              <option value="Alliums">Alliums</option>
+              <option value="Fruits">Fruits</option>
+              <option value="Herbs">Herbs</option>
+            </select>
+          </div>
+          <div>
+            <label
+              htmlFor="countInStock"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Count In Stock
+            </label>
             <input
               type="number"
               name="countInStock"
@@ -164,17 +238,79 @@ const ProductManagement = () => {
               required
             />
           </div>
-          <div className="md:col-span-2">
-            <label htmlFor="image" className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
-            <input
-              type="text"
-              name="image"
-              id="image"
-              value={formData.image}
+          <div>
+            <label
+              htmlFor="unit"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Unit
+            </label>
+            <select
+              name="unit"
+              id="unit"
+              value={formData.unit}
               onChange={handleChange}
               className="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
               required
+            >
+              <option value="kg">kg</option>
+              <option value="g">g</option>
+              <option value="piece">piece</option>
+              <option value="bunch">bunch</option>
+              <option value="dozen">dozen</option>
+            </select>
+          </div>
+          <div>
+            <label
+              htmlFor="discountPercentage"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Discount Percentage
+            </label>
+            <input
+              type="number"
+              name="discountPercentage"
+              id="discountPercentage"
+              value={formData.discountPercentage}
+              onChange={handleChange}
+              className="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              min="0"
+              max="100"
             />
+          </div>
+          <div>
+            <label
+              htmlFor="origin"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Origin
+            </label>
+            <input
+              type="text"
+              name="origin"
+              id="origin"
+              value={formData.origin}
+              onChange={handleChange}
+              className="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            />
+          </div>
+          <div className="md:col-span-2 flex items-center">
+            <input
+              type="checkbox"
+              name="isOrganic"
+              id="isOrganic"
+              checked={formData.isOrganic}
+              onChange={(e) =>
+                setFormData({ ...formData, isOrganic: e.target.checked })
+              }
+              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+            />
+            <label
+              htmlFor="isOrganic"
+              className="ml-2 block text-sm font-medium text-gray-700"
+            >
+              Is Organic
+            </label>
           </div>
         </div>
         <div className="mt-6 flex justify-end space-x-3">
@@ -191,7 +327,7 @@ const ProductManagement = () => {
             type="submit"
             className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           >
-            {editingProduct ? 'Update Product' : 'Add Product'}
+            {editingProduct ? "Update Product" : "Add Product"}
           </button>
         </div>
       </form>
@@ -200,17 +336,50 @@ const ProductManagement = () => {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th scope="col" className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product ID</th>
-              <th scope="col" className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
-              <th scope="col" className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-              <th scope="col" className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-              <th scope="col" className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
-              <th scope="col" className="py-3 px-6 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              <th
+                scope="col"
+                className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Product ID
+              </th>
+              <th
+                scope="col"
+                className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Product
+              </th>
+              <th
+                scope="col"
+                className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Category
+              </th>
+              <th
+                scope="col"
+                className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Price
+              </th>
+              <th
+                scope="col"
+                className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Stock
+              </th>
+              <th
+                scope="col"
+                className="py-3 px-6 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
             {products.map((product) => (
-              <tr key={product._id} className="hover:bg-gray-50 transition-colors">
+              <tr
+                key={product._id}
+                className="hover:bg-gray-50 transition-colors"
+              >
                 <td className="py-4 px-6 whitespace-nowrap">
                   <Tooltip text={product._id}>
                     <div className="flex items-center text-sm text-gray-500">
@@ -222,16 +391,28 @@ const ProductManagement = () => {
                 <td className="py-4 px-6 whitespace-nowrap">
                   <div className="flex items-center">
                     <div className="flex-shrink-0 h-10 w-10">
-                      <img className="h-10 w-10 rounded-full object-cover" src={product.images?.[0] || product.image} alt={product.title || product.name} />
+                      <img
+                        className="h-10 w-10 rounded-full object-cover"
+                        src={product.images?.[0] || product.image}
+                        alt={product.title || product.name}
+                      />
                     </div>
                     <div className="ml-4">
-                      <div className="text-sm font-medium text-gray-900">{product.title || product.name}</div>
+                      <div className="text-sm font-medium text-gray-900">
+                        {product.title || product.name}
+                      </div>
                     </div>
                   </div>
                 </td>
-                <td className="py-4 px-6 whitespace-nowrap text-sm text-gray-500">{product.category}</td>
-                <td className="py-4 px-6 whitespace-nowrap text-sm font-medium text-gray-800">₹{product.price?.toFixed(2)}</td>
-                <td className="py-4 px-6 whitespace-nowrap text-sm text-gray-500">{product.countInStock}</td>
+                <td className="py-4 px-6 whitespace-nowrap text-sm text-gray-500">
+                  {product.category}
+                </td>
+                <td className="py-4 px-6 whitespace-nowrap text-sm font-medium text-gray-800">
+                  ₹{product.price?.toFixed(2)}
+                </td>
+                <td className="py-4 px-6 whitespace-nowrap text-sm text-gray-500">
+                  {product.countInStock}
+                </td>
                 <td className="py-4 px-6 whitespace-nowrap text-right text-sm font-medium">
                   <div className="flex items-center justify-end space-x-4">
                     <Tooltip text="Edit Product">

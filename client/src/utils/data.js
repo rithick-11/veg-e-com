@@ -31,22 +31,22 @@ export const categories = [
   {
     name: "Vegetables",
     image: "https://images.pexels.com/photos/1435904/pexels-photo-1435904.jpeg",
-    link: "/vegetables",
+    link: "/",
   },
   {
     name: "Fruits",
     image:
       "https://images.pexels.com/photos/68525/soap-colorful-color-fruit-68525.jpeg",
-    link: "/fruits",
+    link: "/",
   },
   {
     name: "Nuts & Seeds",
     image: "https://images.pexels.com/photos/86649/pexels-photo-86649.jpeg",
-    link: "/nuts-seeds",
+    link: "/",
   },
   {
     name: "Snacks",
     image: "https://images.pexels.com/photos/1893555/pexels-photo-1893555.jpeg",
-    link: "/snacks",
+    link: "/",
   },
 ];

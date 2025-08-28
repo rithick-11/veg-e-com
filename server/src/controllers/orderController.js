@@ -1,7 +1,11 @@
-const Order = require("../models/Order");
+const Order = require("../models/Order"); // Assuming this is the path to your Order model
 const Cart = require("../models/Cart");
-const Product = require("../models/Product");
 
+/**
+ * @desc    Create new order
+ * @route   POST /api/orders
+ * @access  Private
+ */
 const createOrder = async (req, res) => {
   const { shippingAddress } = req.body;
 
@@ -18,10 +22,7 @@ const createOrder = async (req, res) => {
       return res.status(400).json({ message: "Cart is empty" });
     }
 
-    let totalAmount = 0;
     const orderItems = cart.items.map((item) => {
-      const itemTotal = item.product.price * item.quantity;
-      totalAmount += itemTotal;
       return {
         product: item.product._id,
         quantity: item.quantity,
@@ -32,7 +33,6 @@ const createOrder = async (req, res) => {
     const order = new Order({
       user: req.user._id,
       items: orderItems,
-      totalAmount,
       shippingAddress,
     });
 
@@ -49,81 +49,122 @@ const createOrder = async (req, res) => {
   }
 };
 
-// Get orders for the logged-in user
-const getUserOrders = async (req, res) => {
-  try {
-    const orders = await Order.find({ user: req.user._id }).populate(
-      "items.product"
-    );
-    res.json(orders);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
-  }
-};
-
-// Admin: Get all orders
+/**
+ * @desc    Get all orders
+ * @route   GET /api/orders
+ * @access  Private/Admin
+ */
 const getAllOrders = async (req, res) => {
   try {
-    const orders = await Order.find({}).populate("user", "name email").populate("items.product");
+    const orders = await Order.find({}).populate("user", "id name");
     res.json(orders);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
+    res
+      .status(500)
+      .json({ message: "Error fetching all orders", error: error.message });
   }
 };
 
-// Admin: Get order by ID
-const getOrderById = async (req, res) => {
-  try {
-    const order = await Order.findById(req.params.id).populate("user", "name email").populate("items.product");
-
-    if (order) {
-      res.json(order);
-    } else {
-      res.status(404).json({ message: "Order not found" });
-    }
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
-  }
-};
-
-// Admin: Update order status
+/**
+ * @desc    Update an order's status
+ * @route   PUT /api/orders/:id
+ * @access  Private/Admin
+ */
 const updateOrder = async (req, res) => {
   try {
-    const order = await Order.findById(req.params.id);
+    const updatedOrder = await Order.findByIdAndUpdate(
+      req.params.id,
+      { $set: req.body }, // Using $set to update only the fields in the request body
+      { new: true, runValidators: true } // `new: true` is crucial to return the updated document
+    );
+
+    if (!updatedOrder) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    res.json(updatedOrder);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error updating order", error: error.message });
+  }
+};
+
+/**
+ * @desc    Get order by ID
+ * @route   GET /api/orders/:id
+ * @access  Private
+ */
+const getOrderById = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id).populate(
+      "user",
+      "name email"
+    );
 
     if (order) {
-      order.status = req.body.status || order.status;
-      // You can add more fields to update here if needed
-
-      const updatedOrder = await order.save();
-      res.json(updatedOrder);
+      // Check if the user is an admin or the owner of the order
+      if (
+        req.user.role === "admin" ||
+        order.user._id.toString() === req.user._id.toString()
+      ) {
+        res.json(order);
+      } else {
+        res.status(401).json({ message: "Not authorized to view this order" });
+      }
     } else {
       res.status(404).json({ message: "Order not found" });
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
+    res
+      .status(500)
+      .json({ message: "Error fetching order", error: error.message });
   }
 };
 
-// Admin: Delete order
+/**
+ * @desc    Delete an order
+ * @route   DELETE /api/orders/:id
+ * @access  Private/Admin
+ */
 const deleteOrder = async (req, res) => {
   try {
-    const order = await Order.findById(req.params.id);
-
+    const order = await Order.findByIdAndDelete(req.params.id);
     if (order) {
-      await order.deleteOne();
       res.json({ message: "Order removed" });
     } else {
       res.status(404).json({ message: "Order not found" });
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
+    res
+      .status(500)
+      .json({ message: "Error deleting order", error: error.message });
   }
 };
 
-module.exports = { createOrder, getUserOrders, getAllOrders, getOrderById, updateOrder, deleteOrder };
+/**
+ * @desc    Get logged in user orders
+ * @route   GET /api/orders/myorders
+ * @access  Private
+ */
+const getMyOrders = async (req, res) => {
+  try {
+    const orders = await Order.find({ user: req.user._id }).populate(
+      "orderItems.product"
+    );
+    res.json(orders);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error fetching user orders", error: error.message });
+  }
+};
+
+module.exports = {
+  createOrder,
+  getAllOrders,
+  getOrderById,
+  updateOrder,
+  deleteOrder,
+  getMyOrders,
+};

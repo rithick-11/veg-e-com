@@ -48,17 +48,41 @@ const getAllProducts = async (req, res) => {
     const products = await Product.find({});
     res.json(products);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching products", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching products", error: error.message });
   }
 };
 
 const getProductById = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
+
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
-    res.json(product);
+
+    const productObject = product.toObject();
+    productObject.inCart = false;
+    productObject.quantity = 0;
+
+    // The route is protected, so req.user is available.
+    if (req.user) {
+      const cart = await Cart.findOne({ user: req.user._id });
+
+      if (cart) {
+        const cartItem = cart.items.find(
+          (item) => item.product.toString() === product._id.toString()
+        );
+
+        if (cartItem) {
+          productObject.inCart = true;
+          productObject.quantity = cartItem.quantity;
+        }
+      }
+    }
+
+    res.json(productObject);
   } catch (error) {
     res
       .status(500)
@@ -87,7 +111,9 @@ const updateProduct = async (req, res) => {
       res.status(404).json({ message: "Product not found" });
     }
   } catch (error) {
-    res.status(500).json({ message: "Error updating product", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error updating product", error: error.message });
   }
 };
 
@@ -105,7 +131,9 @@ const deleteProduct = async (req, res) => {
       res.status(404).json({ message: "Product not found" });
     }
   } catch (error) {
-    res.status(500).json({ message: "Error deleting product", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error deleting product", error: error.message });
   }
 };
 

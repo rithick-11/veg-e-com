@@ -114,7 +114,7 @@ const OrderManagement = () => {
                   <div className="text-xs text-gray-500">{order.user?.email || 'N/A'}</div>
                 </td>
                 <td className="py-4 px-6 whitespace-nowrap text-sm font-medium text-gray-800">
-                  ₹{order.totalAmount?.toFixed(2)}
+                  ₹{order.totalPrice?.toFixed(2)}
                 </td>
                 <td className="py-4 px-6 whitespace-nowrap text-sm">
                   {editingOrderId === order._id ? (

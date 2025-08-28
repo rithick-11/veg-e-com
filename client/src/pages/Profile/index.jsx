@@ -20,7 +20,7 @@ const Profile = () => {
     const fetchOrders = async () => {
       setIsLoading(true);
       try {
-        const response = await server.get("/orders");
+        const response = await server.get("/orders/myorders");
         setOrders(response.data);
       } catch (error) {
         console.error("Failed to fetch orders", error);
@@ -74,10 +74,7 @@ const Profile = () => {
                           </p>
                         </div>
                         <div className="text-right">
-                          <p className="text-lg font-semibold flex items-center">
-                            <FaDollarSign className="mr-1" />
-                            {order.totalAmount.toFixed(2)}
-                          </p>
+                          
                           <p
                             className={`text-sm font-medium mt-1 px-2 py-1 rounded-full inline-block ${
                               order.status === "Delivered"
@@ -95,7 +92,7 @@ const Profile = () => {
                       <div className="mt-4">
                         <h4 className="font-semibold mb-2">Items:</h4>
                         <ul className="space-y-2">
-                          {order.items.map((item) => (
+                          {order.orderItems.map((item) => (
                             <li
                               key={item.product._id}
                               className="flex justify-between items-center text-sm"
@@ -103,12 +100,7 @@ const Profile = () => {
                               <span>
                                 {item.product.title} &times; {item.quantity}
                               </span>
-                              <span className="text-gray-600">
-                                $
-                                {(item.product.price * item.quantity).toFixed(
-                                  2
-                                )}
-                              </span>
+                              
                             </li>
                           ))}
                         </ul>

@@ -3,10 +3,9 @@ import { useNavigate } from "react-router-dom";
 import useAppStore from "../../store/useAppStore";
 import { Container } from "../../components/UI";
 import toast from "react-hot-toast";
-import server from "../../services/api";
 
 const Checkout = () => {
-  const { cartItems, clearCart, getCart } = useAppStore();
+  const { cartItems, getCart, createOrder, isLoading } = useAppStore();
   const navigate = useNavigate();
   const [shippingAddress, setShippingAddress] = useState({
     address: "",
@@ -26,23 +25,35 @@ const Checkout = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (
+      !shippingAddress.address ||
+      !shippingAddress.city ||
+      !shippingAddress.postalCode ||
+      !shippingAddress.country
+    ) {
+      toast.error("Please fill in all shipping address fields.");
+      return;
+    }
+    if (cartItems.length === 0) {
+      toast.error("Your cart is empty.");
+      return;
+    }
+
+    const orderData = {
+      shippingAddress,
+      
+      };
+
     try {
-      const response = await server.post("/orders", { shippingAddress });
-      if (response.status === 201) {
-        toast.success("Order placed successfully!");
-        clearCart();
-        navigate("/dashboard"); // Redirect to dashboard or an order confirmation page
-      }
+      const newOrder = await createOrder(orderData);
+      navigate(`/order/${newOrder._id}`); // Redirect to the order confirmation page
     } catch (error) {
-      toast.error("Failed to place order. Please try again.");
-      console.error(error);
+      // Error toast is handled in the store's createOrder action
+      console.error("Failed to place order:", error);
     }
   };
 
-  const totalAmount = cartItems?.reduce(
-    (acc, item) => acc + item.product.price * item.quantity,
-    0
-  );
+  
 
   return (
     <Container>
@@ -122,9 +133,10 @@ const Checkout = () => {
               </div>
               <button
                 type="submit"
-                className="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700"
+                className="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 disabled:opacity-50"
+                disabled={isLoading}
               >
-                Place Order
+                {isLoading ? "Placing Order..." : "Place Order"}
               </button>
             </form>
           </div>
@@ -138,19 +150,16 @@ const Checkout = () => {
                     className="flex justify-between items-center mb-2"
                   >
                     <span>
-                      {item.product.title} x {item.quantity}
+                      {item.product.name} x {item.quantity}
                     </span>
                     <span>
-                      ${(item.product.price * item.quantity).toFixed(2)}
+                      ₹{(item.product.finalPrice * item.quantity).toFixed(2)}
                     </span>
                   </li>
                 ))}
               </ul>
               <hr className="my-4" />
-              <div className="flex justify-between font-bold text-lg">
-                <span>Total</span>
-                <span>${totalAmount?.toFixed(2)}</span>
-              </div>
+              
             </div>
           </div>
         </div>
