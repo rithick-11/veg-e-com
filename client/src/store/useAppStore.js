@@ -367,7 +367,7 @@ const useAppStore = create((set, get) => ({
   addProduct: async (productData) => {
     try {
       const response = await server.post("/products", productData);
-      set((state) => ({ products: [...state.products, response.data] }));
+      set((state) => ({ products: [...state.products, response.data] }));  
       toast.success("Product added successfully!");
       return response.data;
     } catch (error) {

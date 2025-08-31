@@ -12,14 +12,14 @@ const NotFound = () => {
           loop
           autoplay
         />
-        <p className="text-lg text-gray-600 mb-8">
+        <p className="text-xs lg:text-lg text-gray-600 mb-8">
           The page you are looking for does not exist.
         </p>
         <Link
           to="/"
           className="px-6 py-3 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
         >
-          Go back to Home
+          Contact the support team 
         </Link>
       </div>
     </Container>
