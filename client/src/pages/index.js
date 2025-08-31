@@ -11,4 +11,6 @@ import Checkout from "./Checkout";
 
 import Profile from "./Profile";
 
-export { Home, Dashboard, Login , Signup, Cart, Product, Checkout, Profile };
+import NotFound from "./NotFound";
+
+export { Home, Dashboard, Login , Signup, Cart, Product, Checkout, Profile, NotFound };

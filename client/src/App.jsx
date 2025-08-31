@@ -19,6 +19,7 @@ import UserManagement from "./pages/Dashboard/UserManagement";
 import OrderManagement from "./pages/Dashboard/OrderManagement"; // New import
 import ProductManagement from "./pages/Dashboard/ProductManagement";
 import useAppStore from "./store/useAppStore";
+import NotFound from "./pages/NotFound";
 
 const App = () => {
   const { loadUser } = useAppStore();
@@ -34,7 +35,7 @@ const App = () => {
         <Container>
           <ScrollToTop />
           <Routes>
-            <Route exact path="/" element={<Home />}></Route>
+            {/* <Route exact path="/" element={<Home />}></Route>
             <Route path="/login" element={<Login />}></Route>
             <Route path="/signup" element={<Signup />}></Route>
             <Route path="/cart" element={<Cart />}></Route>
@@ -44,12 +45,14 @@ const App = () => {
 
             {/* Admin Routes */}
 
-            <Route element={<AdminRoute />}>
+            {/* <Route element={<AdminRoute />}>
               <Route path="/dashboard" element={<AdminDashboard />} />
               <Route path="/dashboard/users" element={<UserManagement />} />
               <Route path="/dashboard/orders" element={<OrderManagement />} />
               <Route path="/dashboard/products" element={<ProductManagement />} />
-            </Route>
+            </Route> 
+             */}
+            <Route path="*" element={<NotFound />} />
           </Routes>
           <NewLetter />
         </Container>{" "}
