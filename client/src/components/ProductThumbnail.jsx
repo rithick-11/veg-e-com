@@ -62,7 +62,7 @@ const ProductThumbnail = ({ product }) => {
             {title}
           </h3>
           <div className="flex items-baseline gap-2 mt-2">
-            <p className="text-xl font-bold text-green-600">
+            <p className="text-xl font-bold text-blue-600">
               ₹{Math.round(finalPrice)}
             </p>
             {product.discountPercentage > 0 && (
@@ -94,7 +94,7 @@ const ProductThumbnail = ({ product }) => {
         ) : (
           <button
             onClick={handleAddToCart}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-green-600 text-white font-semibold hover:bg-green-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
           >
             {!isLoading ? (
               <>

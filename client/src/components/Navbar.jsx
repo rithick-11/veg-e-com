@@ -18,10 +18,10 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="sticky top-0 z-50 border-b bg-green-600 text-white shadow-lg">
+    <nav className="sticky top-0 z-50 border-b bg-blue-600 text-white shadow-lg">
       <Container className="min-h-16 flex justify-between items-center">
         <Link to="/">
-          <h1 className="text-2xl font-bold tracking-tight">Excel Store</h1>
+          <h1 className="text-2xl font-bold tracking-tight">E-veg </h1>
         </Link>
         {/* Desktop Menu */}
         <ul className="hidden items-center gap-6 md:flex">
@@ -31,7 +31,7 @@ const Navbar = () => {
                 <li>
                   <Link
                     to="/dashboard"
-                    className="font-medium transition-colors hover:text-green-200"
+                    className="font-medium transition-colors hover:text-blue-200"
                   >
                     Dashboard
                   </Link>
@@ -40,7 +40,7 @@ const Navbar = () => {
               <li>
                 <Link
                   to="/profile"
-                  className="font-medium transition-colors hover:text-green-200"
+                  className="font-medium transition-colors hover:text-blue-200"
                 >
                   Profile
                 </Link>
@@ -48,7 +48,7 @@ const Navbar = () => {
               <li className="relative">
                 <Link
                   to="/cart"
-                  className="transition-colors hover:text-green-200"
+                  className="transition-colors hover:text-blue-200"
                 >
                   <AiOutlineShoppingCart size={28} />
                   {cartItemCount > 0 && (
@@ -72,7 +72,7 @@ const Navbar = () => {
             <li>
               <Link
                 to={"/login"}
-                className="flex items-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-semibold text-green-700 transition-colors hover:bg-gray-100"
+                className="flex items-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-semibold text-blue-700 transition-colors hover:bg-gray-100"
               >
                 <VscAccount size={20} />
                 <span>Login</span>
@@ -85,7 +85,7 @@ const Navbar = () => {
         <div className="flex items-center gap-4 md:hidden">
           <Link
             to="/cart"
-            className="relative transition-colors hover:text-green-200"
+            className="relative transition-colors hover:text-blue-200"
             aria-label="Shopping cart"
           >
             <AiOutlineShoppingCart size={28} />
@@ -122,7 +122,7 @@ const Navbar = () => {
         {/* Menu Content */}
         <div className="fixed right-0 top-0 h-full w-4/5 max-w-sm bg-white text-black shadow-xl">
           <div className="flex items-center justify-between border-b p-4">
-            <h2 className="text-xl font-bold text-green-700">Menu</h2>
+            <h2 className="text-xl font-bold text-blue-700">Menu</h2>
             <button
               onClick={() => setIsMobileMenuOpen(false)}
               className="text-gray-600 hover:text-gray-900"
@@ -142,7 +142,7 @@ const Navbar = () => {
                   <li><button onClick={handleLogout} className="flex w-full items-center gap-2 rounded-md bg-red-500 px-4 py-2 text-left text-sm font-semibold text-white transition-colors hover:bg-red-600"><AiOutlineLogout size={18} /><span>Logout</span></button></li>
                 </>
               ) : (
-                <li><Link to={"/login"} className="flex w-full items-center gap-2 rounded-md bg-green-600 px-4 py-2 text-left text-sm font-semibold text-white transition-colors hover:bg-green-700" onClick={() => setIsMobileMenuOpen(false)}><VscAccount size={20} /><span>Login</span></Link></li>
+                <li><Link to={"/login"} className="flex w-full items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-left text-sm font-semibold text-white transition-colors hover:bg-blue-700" onClick={() => setIsMobileMenuOpen(false)}><VscAccount size={20} /><span>Login</span></Link></li>
               )}
             </ul>
           </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import Recommendation from "./Recommendation";
 import { IoLocationOutline } from "react-icons/io5";
 import toast from "react-hot-toast";
@@ -34,13 +34,13 @@ const ProductDetail = () => {
     const value = parseInt(e.target.value, 10);
     if (!isNaN(value) && value > 0) {
       setQuantityToAdd(value);
-    } else if (e.target.value === '') {
-      setQuantityToAdd(''); // Allow empty input temporarily for user typing
+    } else if (e.target.value === "") {
+      setQuantityToAdd(""); // Allow empty input temporarily for user typing
     }
   };
 
   const handleIncrement = () => {
-    setQuantityToAdd((prev) => (prev === '' ? 1 : prev + 1));
+    setQuantityToAdd((prev) => (prev === "" ? 1 : prev + 1));
   };
 
   const handleDecrement = () => {
@@ -52,7 +52,7 @@ const ProductDetail = () => {
       toast.error("Please log in to add items to your cart.");
       return;
     }
-    if (quantityToAdd === '' || quantityToAdd <= 0) {
+    if (quantityToAdd === "" || quantityToAdd <= 0) {
       toast.error("Quantity must be a positive number.");
       return;
     }
@@ -150,7 +150,9 @@ const ProductDetail = () => {
                 </button>
               </>
             ) : (
-              <p className="text-red-500">Please log in to add items to your cart.</p>
+              <Link to='/login' className="text-center bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded disabled:opacity-50 disabled:cursor-not-allowed">
+                Login to add to cart
+              </Link>
             )}
           </div>
         </div>

@@ -52,13 +52,21 @@ const dynamicProductList = async (products, userId) => {
 };
 
 const getRecommandedProductsList = async (userId, pId) => {
+  let pCatagory = new Set();
+  let products = [];
+  if (!userId) {
+    const { category } = await Product.findById(pId);
+    pCatagory.add(category);
+    products = await Product.find()
+      .where("category")
+      .in(Array.from(pCatagory))
+      .exec();
+    return products;
+  }
   const userCart = await Cart.findOne({ user: userId }).populate(
     "items.product"
   );
-  let pCatagory = new Set();
-  let products = [];
-  const { category } = await Product.findById(pId);
-  pCatagory.add(category);
+
   if (userCart) {
     userCart.items.forEach((item) => {
       pCatagory.add(item.product.category);
@@ -72,4 +80,8 @@ const getRecommandedProductsList = async (userId, pId) => {
   return dynamicProductList(products, userId);
 };
 
-module.exports = { getProdutByUserid, getRecommandedProductsList, dynamicProductList };
+module.exports = {
+  getProdutByUserid,
+  getRecommandedProductsList,
+  dynamicProductList,
+};

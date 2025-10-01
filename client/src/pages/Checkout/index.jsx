@@ -46,7 +46,7 @@ const Checkout = () => {
 
     try {
       const newOrder = await createOrder(orderData);
-      navigate(`/order/${newOrder._id}`); // Redirect to the order confirmation page
+      navigate(`/profile`); // Redirect to the order confirmation page
     } catch (error) {
       // Error toast is handled in the store's createOrder action
       console.error("Failed to place order:", error);
@@ -133,7 +133,7 @@ const Checkout = () => {
               </div>
               <button
                 type="submit"
-                className="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 disabled:opacity-50"
+                className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50"
                 disabled={isLoading}
               >
                 {isLoading ? "Placing Order..." : "Place Order"}
@@ -158,8 +158,6 @@ const Checkout = () => {
                   </li>
                 ))}
               </ul>
-              <hr className="my-4" />
-              
             </div>
           </div>
         </div>

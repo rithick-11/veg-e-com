@@ -140,8 +140,9 @@ const deleteProduct = async (req, res) => {
 const getRecommendedProducts = async (req, res) => {
   try {
     const { pId } = req.params;
+    console.log(req.user)
     const recmmendedProducts = await getRecommandedProductsList(
-      req.user.id,
+      req?.user?.id,
       pId
     );
     return res.json(recmmendedProducts);

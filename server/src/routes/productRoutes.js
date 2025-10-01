@@ -23,9 +23,9 @@ router
 router.route("/admin").get(protect, admin, getAllProducts); // New route for admin to get all products
 router
   .route("/:id")
-  .get(protect, getProductById)
+  .get(optionalProtect, getProductById)
   .put(protect, admin, updateProduct)
   .delete(protect, admin, deleteProduct);
-router.route("/:pId/recommendations").get(protect, getRecommendedProducts);
+router.route("/:pId/recommendations").get(optionalProtect, getRecommendedProducts);
 
 module.exports = router;
